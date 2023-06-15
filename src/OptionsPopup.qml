@@ -578,6 +578,9 @@ Popup {
     function addCloudInit(s) {
         cloudinit += s+"\n"
     }
+    function addCloudInitMetadata(s) {
+        cloudinit_metadata += s+"\n"
+    }
     function addCloudInitWriteFile(name, content, perms) {
         cloudinitwrite += "- encoding: b64\n"
         cloudinitwrite += "  content: "+Qt.btoa(content)+"\n"
@@ -598,6 +601,7 @@ Popup {
         cloudinitrun = ""
         cloudinitwrite = ""
         cloudinitnetwork = ""
+        cloudinit_metadata = ""
 
         if (chkHostname.checked && fieldHostname.length) {
             addFirstRun("CURRENT_HOSTNAME=`cat /etc/hostname | tr -d \" \\t\\n\\r\"`")
@@ -796,7 +800,14 @@ Popup {
             addCloudInit("runcmd:\n"+cloudinitrun+"\n")
         }
 
-        imageWriter.setImageCustomization(config, cmdline, firstrun, cloudinit, cloudinitnetwork)
+        /* Since this is a NoCloud configuration, meta-data is static values. */
+        if (cloudinit_metadata.length) {
+            cloudinit_metadata = "instance-id: iid-raspberrypi\n"
+                                +"local-hostname: "+fieldHostname.text+"\n"
+                                +cloudinit_metadata
+        }
+
+        imageWriter.setImageCustomization(config, cmdline, firstrun, cloudinit, cloudinitnetwork, cloudinit_metadata)
     }
 
     function saveSettings()
